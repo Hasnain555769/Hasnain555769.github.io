@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simple Grammar & Synonyms Tool</title>
+  <!-- Agar AdSense lagana ho to yahan head mein unka <script> paste karna (AdSense account se milega) -->
+  <!-- Example: <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script> -->
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto;max-width:900px;margin:30px auto;padding:0 16px}
+    textarea{width:100%;height:140px;padding:10px;font-size:16px}
+    button{margin:6px 6px 6px 0;padding:8px 12px}
+    .out{border:1px solid #ddd;padding:10px;margin-top:12px;border-radius:6px;background:#fbfbfb}
+    .match{margin-bottom:8px;padding:6px;border-left:4px solid #f39c12}
+    .synlist{display:flex;flex-wrap:wrap;gap:6px}
+    .chip{padding:6px 8px;border-radius:999px;border:1px solid #ccc;cursor:pointer}
+  </style>
+</head>
+<body>
+  <h1>Simple Grammar & Synonyms Tool</h1>
+  <p>Text likho, phir Grammar Check kro — ya koi lafz select karke Synonyms dekho.</p>
+
+  <textarea id="txt" placeholder="Yahan apna text likho..."></textarea>
+  <div>
+    <button id="btnCheck">✔ Grammar Check</button>
+    <button id="btnSyn">🔎 Synonyms for selected word</button>
+    <button id="btnClear">Clear</button>
+  </div>
+
+  <div class="out" id="result"><em>Results will appear here</em></div>
+
+<script>
+const txt = document.getElementById('txt');
+const result = document.getElementById('result');
+document.getElementById('btnClear').onclick = ()=>{ txt.value=''; result.innerHTML='<em>Results will appear here</em>' }
+
+// --------- LanguageTool grammar check (public API) ----------
+async function grammarCheck(text){
+  result.innerHTML = '<em>Checking grammar…</em>';
+  try{
+    // LanguageTool public endpoint (POST). Free but rate-limited — do not spam.
+    const url = 'https://api.languagetool.org/v2/check';
+    const form = new URLSearchParams();
+    form.append('text', text);
+    form.append('language', 'en-US'); // change to 'auto' or another locale if needed
+    const r = await fetch(url, { method:'POST', body: form });
+    if(!r.ok) throw new Error('Server error: '+r.status);
+    const j = await r.json();
+    showGrammar(j);
+  }catch(e){
+    result.innerHTML = '<b>Error:</b> '+e.message + '<br><small>If CORS or rate-limit issues occur, consider using a proxy (Netlify/Vercel function) or self-host LanguageTool.</small>';
+  }
+}
+
+function showGrammar(data){
+  if(!data.matches || data.matches.length===0){
+    result.innerHTML = '<b>No issues found</b>';
+    return;
+  }
+  result.innerHTML = '';
+  data.matches.forEach(m => {
+    const div = document.createElement('div'); div.className='match';
+    const context = m.context && m.context.text ? m.context.text : '';
+    const msg = `<b>${m.message}</b><br>
+      <small>Rule: ${m.rule && m.rule.id ? m.rule.id : ''}</small><br>
+      <i>Context:</i> ${escapeHtml(context)} <br>
+      <i>Suggested:</i> ${ (m.replacements||[]).slice(0,6).map(x=>escapeHtml(x.value)).join(', ') || '—'}`;
+    div.innerHTML = msg;
+    result.appendChild(div);
+  });
+}
+
+// --------- Datamuse synonyms (free) ----------
+async function getSynonyms(word){
+  result.innerHTML = '<em>Looking up synonyms for "'+escapeHtml(word)+'" …</em>';
+  try{
+    const url = 'https://api.datamuse.com/words?ml=' + encodeURIComponent(word) + '&max=20';
+    const r = await fetch(url);
+    const list = await r.json();
+    if(!list || list.length===0){ result.innerHTML = '<b>No synonyms found</b>'; return; }
+    const container = document.createElement('div');
+    container.innerHTML = '<b>Synonyms / related words</b><div class="synlist"></div>';
+    const synlist = container.querySelector('.synlist');
+    list.forEach(item=>{
+      const c = document.createElement('div'); c.className='chip';
+      c.textContent = item.word;
+      c.onclick = ()=>{ /* paste into textarea at cursor */ insertAtCursor(item.word); }
+      synlist.appendChild(c);
+    });
+    result.innerHTML = ''; result.appendChild(container);
+  }catch(e){
+    result.innerHTML = '<b>Error:</b> '+e.message;
+  }
+}
+
+// small helpers
+function escapeHtml(s){ return (s+'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function insertAtCursor(text) {
+  const el = txt;
+  const start = el.selectionStart || 0;
+  const end = el.selectionEnd || 0;
+  el.value = el.value.slice(0,start) + text + el.value.slice(end);
+  el.focus();
+}
+
+// UI buttons
+document.getElementById('btnCheck').onclick = ()=>{
+  const text = txt.value.trim();
+  if(!text){ alert('Pehle kuch text likho.'); return; }
+  // LanguageTool limit: maximum characters per request; large text may be truncated or blocked.
+  grammarCheck(text);
+}
+
+document.getElementById('btnSyn').onclick = ()=>{
+  // get selected word or the last word under cursor
+  const sel = window.getSelection().toString().trim();
+  let word = sel;
+  if(!word){
+    const v = txt.value;
+    const pos = txt.selectionStart || v.length;
+    // find word around pos
+    const left = v.slice(0,pos).split(/\\s+/).pop() || '';
+    const right = v.slice(pos).split(/\\s+/)[0] || '';
+    word = (left+right).trim();
+  }
+  if(!word){ alert('Select ya cursor rakho kisi word pe.'); return; }
+  // clean punctuation
+  word = word.replace(/[^a-zA-Z\\-']/g,'').trim();
+  if(!word){ alert('Select karo ek proper English word.'); return; }
+  getSynonyms(word);
+}
+</script>
+</body>
+</html>
