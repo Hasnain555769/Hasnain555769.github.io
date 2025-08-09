@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Grammar & Synonyms Checker — Hasnain</title>
+  <meta name="description" content="Simple Grammar checker and Synonyms tool — built for GitHub Pages. Uses LanguageTool and Datamuse APIs to detect grammar issues and suggest synonyms." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://hasnain555769.github.io/" />
+  <!-- Basic styling (keeps file single-file for GitHub Pages) -->
+  <style>
+    :root{--bg:#f7fafc;--card:#fff;--accent:#0b5cff}
+    body{font-family:Inter, system-ui, -apple-system,Segoe UI, Roboto, "Helvetica Neue", Arial; background:var(--bg);margin:0;padding:24px}
+    .wrap{max-width:900px;margin:0 auto}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+    h1{margin:0;font-size:20px}
+    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(12,16,20,.06)}
+    textarea{width:100%;min-height:140px;padding:10px;border:1px solid #e6eef8;border-radius:8px;font-size:15px}
+    .controls{display:flex;gap:8px;margin-top:10px;align-items:center}
+    button{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+    button.secondary{background:#4a5568}
+    .row{display:flex;gap:12px;margin-top:12px}
+    .col{flex:1}
+    .result{margin-top:12px}
+    .issue{padding:10px;border-radius:8px;border:1px dashed #dbeafe;margin-bottom:8px}
+    .issue .suggestion{color:#0b5cff;font-weight:600;cursor:pointer}
+    .syns{margin-top:8px}
+    .note{font-size:13px;color:#555;margin-top:10px}
+    footer{margin-top:18px;font-size:13px;color:#444}
+    .loader{display:inline-block;width:16px;height:16px;border:2px solid #fff;border-radius:50%;border-left-color:transparent;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="logo" width="36" height="36"/>
+      <div>
+        <h1>Grammar & Synonyms Checker</h1>
+        <div style="font-size:13px;color:#666">Built for GitHub Pages • Uses LanguageTool + Datamuse</div>
+      </div>
+    </header>
+
+    <div class="card">
+      <label for="text">Type or paste your text below:</label>
+      <textarea id="text" placeholder="Write or paste text here..."></textarea>
+
+      <div class="controls">
+        <select id="language">
+          <option value="en-US">English (US)</option>
+          <option value="en-GB">English (UK)</option>
+          <option value="auto">Auto-detect</option>
+        </select>
+        <button id="checkBtn">Check Grammar</button>
+        <button id="synBtn" class="secondary">Get Synonyms (selected word)</button>
+        <span id="status" style="margin-left:8px"></span>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <h3 style="margin-bottom:8px">Grammar Results</h3>
+          <div id="results" class="result"></div>
+        </div>
+        <div class="col">
+          <h3 style="margin-bottom:8px">Synonyms</h3>
+          <div id="synonyms" class="card" style="min-height:120px;padding:12px"></div>
+        </div>
+      </div>
+
+      <div class="note">
+        Tip: Select any word in the text area and click "Get Synonyms" to fetch alternatives. Click a suggestion in grammar results to replace text.
+      </div>
+    </div>
+
+    <footer>
+      <div>To deploy: replace your repo's index.html with this file and push. If the grammar API gives a CORS error, see instructions below.</div>
+    </footer>
+
+    <div style="margin-top:18px" class="card">
+      <h3>Developer Notes / Troubleshooting</h3>
+      <ol>
+        <li>If results don't show, API call may be blocked by CORS. Use a serverless function (Netlify/Vercel) as proxy — sample in comments below.</li>
+        <li>LanguageTool free public endpoint has rate limits; for heavy usage get a paid plan or self-host an instance.</li>
+        <li>For AdSense: add more original pages (about, contact, privacy), content, and apply after site has useful content and traffic.</li>
+      </ol>
+      <pre style="background:#f3f6fb;padding:8px;border-radius:8px;overflow:auto">Sample serverless proxy (Node.js for Vercel/Netlify):
+
+// handler.js
+const fetch = require('node-fetch')
+module.exports = async (req, res) => {
+  const text = req.body.text || ''
+  const lang = req.body.language || 'en-US'
+  const resp = await fetch('https://api.languagetool.org/v2/check', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({text, language: lang}).toString()
+  })
+  const data = await resp.json()
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.status(200).json(data)
+}
+
+Save above as a serverless function and call it from the frontend if direct fetch fails.
+      </pre>
+    </div>
+  </div>
+
+  <script>
+    const textEl = document.getElementById('text')
+    const checkBtn = document.getElementById('checkBtn')
+    const resultsEl = document.getElementById('results')
+    const statusEl = document.getElementById('status')
+    const synBtn = document.getElementById('synBtn')
+    const synonymsEl = document.getElementById('synonyms')
+    const languageEl = document.getElementById('language')
+
+    function setStatus(msg, loading=false){
+      statusEl.innerHTML = loading ? `<span class="loader"></span> ${msg}` : msg
+    }
+
+    async function checkGrammar(){
+      const text = textEl.value.trim()
+      if(!text){ alert('Please type some text first.'); return }
+      resultsEl.innerHTML = ''
+      setStatus('Checking...', true)
+
+      try{
+        // Primary: direct LanguageTool public API
+        const body = new URLSearchParams({text, language: languageEl.value === 'auto' ? 'auto' : languageEl.value})
+        const resp = await fetch('https://api.languagetool.org/v2/check', {
+          method: 'POST', headers: {'Content-Type':'application/x-www-form-urlencoded'}, body: body.toString()
+        })
+        if(!resp.ok){ throw new Error('Languagetool returned '+resp.status) }
+        const data = await resp.json()
+        renderResults(data)
+        setStatus('Done')
+      }catch(err){
+        console.error(err)
+        setStatus('Direct API failed — check console. Try using a serverless proxy as described below.')
+      }
+    }
+
+    function renderResults(data){
+      if(!data || !data.matches || data.matches.length === 0){ resultsEl.innerHTML = '<div class="issue">No problems found.</div>'; return }
+      resultsEl.innerHTML = ''
+      // Show each match
+      data.matches.forEach((m, idx)=>{
+        const div = document.createElement('div')
+        div.className = 'issue'
+        const context = (m.context && m.context.text) ? m.context.text : textEl.value
+        const offset = m.offset
+        const length = m.length
+        // Build display text using context snippet if available
+        let display = ''
+        if(m.context && m.context.text){
+          const before = m.context.text.slice(0, m.context.offset)
+          const wrong = m.context.text.slice(m.context.offset, m.context.offset + m.context.length)
+          const after = m.context.text.slice(m.context.offset + m.context.length)
+          display = `${escapeHtml(before)}<strong style="background:#fff3bf">${escapeHtml(wrong)}</strong>${escapeHtml(after)}`
+        } else {
+          display = escapeHtml(m.message)
+        }
+
+        div.innerHTML = `
+          <div><strong>Issue:</strong> ${escapeHtml(m.message)}</div>
+          <div style="margin-top:6px">${display}</div>
+          <div style="margin-top:6px">Suggestions: ${m.replacements && m.replacements.length ? m.replacements.slice(0,6).map(r=>`<span class="suggestion" data-rep="${escapeHtml(r.value)}">${escapeHtml(r.value)}</span>`).join(', ') : '<em>none</em>'}</div>
+        `
+        // clicking suggestion replaces first occurrence in textarea
+        div.querySelectorAll('.suggestion').forEach(el=>{
+          el.addEventListener('click', ()=>{
+            replaceFirstMatch(m, el.getAttribute('data-rep'))
+          })
+        })
+
+        resultsEl.appendChild(div)
+      })
+    }
+
+    function replaceFirstMatch(match, replacement){
+      // Attempt a safe replace using match.context if present
+      let t = textEl.value
+      if(match.context && match.context.text){
+        // find the context text in full text and replace the specific offset
+        const ctxt = match.context.text
+        const pos = t.indexOf(ctxt)
+        if(pos !== -1){
+          const start = pos + match.context.offset
+          const before = t.slice(0, start)
+          const after = t.slice(start + match.context.length)
+          textEl.value = before + replacement + after
+          return
+        }
+      }
+      // fallback: simple replace of substring
+      const sub = t.slice(match.offset, match.offset + match.length)
+      if(sub){
+        textEl.value = t.replace(sub, replacement)
+      }
+    }
+
+    function escapeHtml(s){ return s.replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c] || c)) }
+
+    // Synonyms (Datamuse)
+    async function fetchSynonyms(){
+      const sel = getSelectedWord()
+      if(!sel){ alert('Select a single word in the textarea (double-click) first.') ; return }
+      synonymsEl.innerHTML = 'Fetching...'
+      try{
+        const resp = await fetch(`https://api.datamuse.com/words?rel_syn=${encodeURIComponent(sel)}&max=20`)
+        const data = await resp.json()
+        if(!data || data.length === 0){ synonymsEl.innerHTML = 'No synonyms found.'; return }
+        synonymsEl.innerHTML = data.map(d=>`<button class="chip" style="margin:6px;padding:6px 8px;border-radius:8px;border:1px solid #e6eef8;background:white;cursor:pointer" data-word="${escapeHtml(d.word)}">${escapeHtml(d.word)}</button>`).join('')
+        // add click to replace selected word
+        synonymsEl.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{
+          replaceSelectedWord(b.getAttribute('data-word'))
+        }))
+      }catch(err){
+        console.error(err)
+        synonymsEl.innerHTML = 'Error fetching synonyms (see console)'
+      }
+    }
+
+    function getSelectedWord(){
+      // try to get selected text within textarea
+      const textarea = textEl
+      const start = textarea.selectionStart
+      const end = textarea.selectionEnd
+      if(start === end) return null
+      const sel = textarea.value.slice(start, end).trim()
+      // only allow single word
+      if(sel.split(/\s+/).length > 1) return null
+      return sel
+    }
+
+    function replaceSelectedWord(word){
+      const textarea = textEl
+      const start = textarea.selectionStart
+      const end = textarea.selectionEnd
+      const before = textarea.value.slice(0, start)
+      const after = textarea.value.slice(end)
+      textarea.value = before + word + after
+    }
+
+    checkBtn.addEventListener('click', checkGrammar)
+    synBtn.addEventListener('click', fetchSynonyms)
+
+    // Optional: run quick sample on load
+    // textEl.value = "This is a sample sentnce with bad grammer to test the tool."
+  </script>
+</body>
+</html>
