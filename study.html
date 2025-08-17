@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student Tools - Hasnain's Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: #fff;
+    }
+    header {
+      background: rgba(0, 0, 0, 0.85);
+      padding: 1rem;
+      text-align: center;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 0.5rem 0;
+    }
+    nav a {
+      color: white;
+      padding: 0.7rem 1rem;
+      margin: 0.3rem;
+      text-decoration: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+    nav a:hover {
+      box-shadow: 0 0 8px #00ffff;
+      background: rgba(255, 255, 255, 0.25);
+    }
+    main {
+      padding: 2rem;
+      max-width: 1000px;
+      margin: auto;
+    }
+    section {
+      background: #fff;
+      color: #000;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      box-shadow: 0px 6px 20px rgba(0,0,0,0.25);
+    }
+    h2 {
+      color: #2575fc;
+      margin-top: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-top: 5px;
+    }
+    button {
+      background: #2575fc;
+      color: white;
+      padding: 0.7rem 1.2rem;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #1b5ed8;
+    }
+    footer {
+      background: rgba(0, 0, 0, 0.9);
+      color: #ddd;
+      text-align: center;
+      padding: 1.2rem;
+      margin-top: 2rem;
+      font-style: italic;
+      font-size: 0.95rem;
+      box-shadow: 0 -3px 10px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Student Tools</h1>
+</header>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="tools.html">Student Tools</a>
+</nav>
+
+<main>
+  <!-- Time Management Calendar -->
+  <section>
+    <h2>📅 Time Management Calendar</h2>
+    <p>Plan your daily study schedule. Add tasks with time slots and stay organized.</p>
+    <table id="calendar">
+      <thead>
+        <tr><th>Time</th><th>Task</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>08:00 - 09:00</td><td><input type="text" placeholder="Enter task..."></td></tr>
+        <tr><td>09:00 - 10:00</td><td><input type="text" placeholder="Enter task..."></td></tr>
+        <tr><td>10:00 - 11:00</td><td><input type="text" placeholder="Enter task..."></td></tr>
+        <tr><td>11:00 - 12:00</td><td><input type="text" placeholder="Enter task..."></td></tr>
+        <tr><td>12:00 - 01:00</td><td><input type="text" placeholder="Enter task..."></td></tr>
+        <tr><td>02:00 - 03:00</td><td><input type="text" placeholder="Enter task..."></td></tr>
+        <tr><td>03:00 - 04:00</td><td><input type="text" placeholder="Enter task..."></td></tr>
+        <tr><td>04:00 - 05:00</td><td><input type="text" placeholder="Enter task..."></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Research Study Guide -->
+  <section>
+    <h2>📖 Research Study Guide</h2>
+    <p>Use this guide to structure your research and writing effectively:</p>
+    <ul>
+      <li><strong>Step 1:</strong> Define your research question clearly.</li>
+      <li><strong>Step 2:</strong> Gather authentic sources (books, articles, journals).</li>
+      <li><strong>Step 3:</strong> Take structured notes (keywords, summaries).</li>
+      <li><strong>Step 4:</strong> Organize your outline (Introduction, Body, Conclusion).</li>
+      <li><strong>Step 5:</strong> Write your first draft — don’t aim for perfection.</li>
+      <li><strong>Step 6:</strong> Revise, proofread, and finalize.</li>
+    </ul>
+    <textarea placeholder="Write your own study plan or research notes here..."></textarea>
+    <button onclick="saveNotes()">💾 Save Notes</button>
+    <div id="savedMsg" style="color:green;margin-top:8px;display:none;">Notes saved locally!</div>
+  </section>
+</main>
+
+<footer>
+  <p>© 2025 Hasnain Ali Qureshi | Student Tools Page</p>
+</footer>
+
+<script>
+  function saveNotes() {
+    const notes = document.querySelector("textarea").value;
+    localStorage.setItem("researchNotes", notes);
+    document.getElementById("savedMsg").style.display = "block";
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const saved = localStorage.getItem("researchNotes");
+    if (saved) {
+      document.querySelector("textarea").value = saved;
+    }
+  });
+</script>
+
+</body>
+</html>
