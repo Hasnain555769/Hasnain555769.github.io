@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="favicon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hasnain's Student Support Platform</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: rgba(0, 0, 0, 0.85);
+      padding: 1rem;
+      text-align: center;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 0.5rem 0;
+    }
+    nav a {
+      color: white;
+      padding: 0.7rem 1rem;
+      margin: 0.3rem;
+      text-decoration: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+    nav a:hover {
+      box-shadow: 0 0 8px #00ffff;
+      background: rgba(255, 255, 255, 0.25);
+    }
+    main {
+      padding: 2rem;
+      max-width: 900px;
+      margin: auto;
+    }
+    section {
+      background: #fff;
+      color: #000;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+    h2 { margin-top: 0; }
+    input, button, select {
+      padding: 0.6rem;
+      margin: 0.3rem 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 100%;
+      font-size: 1rem;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+      width: auto;
+    }
+    button:hover { background: #45a049; }
+    .output-box {
+      background: #f9f9f9;
+      color: #000;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-top: 1rem;
+      border: 1px solid #ddd;
+      min-height: 40px;
+      white-space: pre-wrap;
+    }
+    footer {
+      background: rgba(0, 0, 0, 0.9);
+      color: #ddd;
+      text-align: center;
+      padding: 1.2rem;
+      margin-top: 2rem;
+      font-style: italic;
+      font-size: 0.95rem;
+      box-shadow: 0 -3px 10px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Student Tools</h1>
+  <p>Maths Equation Solver & Scholarships Advisor</p>
+</header>
+
+<nav>
+  <a href="index.html">⬅ Back to Home</a>
+</nav>
+
+<main>
+  <!-- Maths Equation Solver -->
+  <section id="math-solver">
+    <h2>📐 Maths Equation Solver</h2>
+    <p>Enter a math expression (example: <code>2+3*5</code> or <code>sqrt(16)</code>).</p>
+    <input type="text" id="mathInput" placeholder="Type your equation...">
+    <button onclick="solveMath()">Solve</button>
+    <div id="mathResult" class="output-box"></div>
+  </section>
+
+  <!-- Scholarships Tips Advisor -->
+  <section id="scholarships">
+    <h2>🎓 Scholarships Tips Advisor</h2>
+    <p>Choose your study level and get scholarship tips.</p>
+    <select id="studyLevel">
+      <option value="undergraduate">Undergraduate</option>
+      <option value="postgraduate">Postgraduate</option>
+      <option value="phd">PhD</option>
+    </select>
+    <button onclick="getTips()">Get Tips</button>
+    <div id="tipsResult" class="output-box"></div>
+  </section>
+</main>
+
+<footer>
+  <p>© 2025 Hasnain Ali Qureshi | Student Tools</p>
+</footer>
+
+<script>
+  // Maths Solver
+  function solveMath() {
+    let input = document.getElementById("mathInput").value.trim();
+    let resultBox = document.getElementById("mathResult");
+    if (input === "") {
+      resultBox.innerHTML = "❌ Please enter an equation.";
+      return;
+    }
+    try {
+      let answer = Function("return " + input.replace(/sqrt/g,"Math.sqrt"))();
+      resultBox.innerHTML = "✅ Result: " + answer;
+    } catch (e) {
+      resultBox.innerHTML = "⚠️ Invalid equation. Try again.";
+    }
+  }
+
+  // Scholarship Tips Advisor
+  function getTips() {
+    let level = document.getElementById("studyLevel").value;
+    let result = document.getElementById("tipsResult");
+    let tips = "";
+
+    if (level === "undergraduate") {
+      tips = "✔ Focus on need-based scholarships.\n✔ Apply early and maintain a strong GPA.\n✔ Look for community and government programs.";
+    } else if (level === "postgraduate") {
+      tips = "✔ Explore research grants and assistantships.\n✔ Highlight your academic projects in applications.\n✔ Apply for international scholarships (Fulbright, Erasmus).";
+    } else if (level === "phd") {
+      tips = "✔ Seek funding from universities and research institutes.\n✔ Publish research papers early.\n✔ Connect with professors for funded PhD opportunities.";
+    }
+    result.innerHTML = tips.replace(/\n/g,"<br>");
+  }
+</script>
+
+</body>
+</html>
