@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ & Helps</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: #fff;
+    }
+    header {
+      background: #222;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    header a {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 8px 15px;
+      background: #007BFF; /* Blue */
+      color: #fff; /* White text */
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    header a:hover {
+      background: #0056b3;
+    }
+    section {
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+    h2 {
+      color: #ffeb3b;
+      margin-top: 0;
+      text-align: center;
+    }
+    .share-buttons {
+      text-align: center;
+      margin: 20px auto;
+    }
+    .share-buttons a {
+      margin: 0 10px;
+      text-decoration: none;
+      background: #fff;
+      color: #000;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: 0.3s;
+      display: inline-block;
+    }
+    .share-buttons a:hover {
+      background: #ffeb3b;
+    }
+    .about {
+      margin-top: 30px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+    }
+    form {
+      margin-top: 25px;
+      display: flex;
+      flex-direction: column;
+    }
+    input, textarea {
+      margin: 8px 0;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      width: 100%;
+    }
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #ffeb3b;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #ffc107;
+    }
+    footer {
+      background: #000;
+      color: #fff;
+      text-align: center;
+      padding: 15px 0;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>FAQ & Helps</h1>
+  <a href="index.html">← Back to Home</a>
+</header>
+
+<section>
+  <h2>How to Use This Website?</h2>
+  <p><b>Index Page:</b> Here you can check Grammar by typing any sentence, and check Synonyms by selecting a word and clicking Synonyms Check. You can also use the GPA Calculator by adding multiple subjects to know your GPA, and read Articles related to Technology and Education.</p>
+  <p><b>Tools Page:</b> Here you can perform Mathematics operations (+, −, ×, ÷) and also get Tips for Abroad Studies including Bachelors, Masters, and PhD.</p>
+  <p><b>Study Page:</b> In this section, you can set a <b>Time Management Calendar</b> according to your events and also get <b>Research Paper Guides</b> of every field.</p>
+  <p><b>Creator Page:</b> Here you can discover <b>20 inspiring Quotes</b> and <b>20 creative Captions</b> from multiple categories, and even create yo</p>
+  <p><b>Ultimate Page:</b> Here you can <b>Find More Effective Synonyms</b> and <b>Check the Proper Tense</b> regarding your match.</p>
+  <p><b>Resume Page:</b> Here you can <b>Make Your Own Resume / CV</b> through a <b>Professionalised Way</b> easily.</p>
+ur own <b>customized Quizzes</b> easily based on your questions.</p>
+</section>
+
+<section class="share-buttons">
+  <h2>Share With Friends</h2>
+  <a id="share-whatsapp" target="_blank">WhatsApp</a>
+  <a id="share-facebook" target="_blank">Facebook</a>
+  <a id="share-instagram" target="_blank">Instagram</a>
+</section>
+
+<section class="about">
+  <h2>About Me</h2>
+  <p>👋 I am <b>Hasnain Ali Qureshi</b>, a passionate and creative learner with a strong interest in <b>Media, Communication, and Technology</b>.  
+  I am currently pursuing my <b>BS (Hons) in Media and Communication Studies</b>.  
+  With my dedication to innovation and knowledge, I was proudly <b>selected as a delegate in the Neuteric Summit, USA – New York</b>, where I represented young voices and shared impactful ideas. 🌍✨</p>
+</section>
+
+<section>
+  <h2>Feedback / Contact Me</h2>
+  <form action="mailto:YourEmailHere@gmail.com" method="post" enctype="text/plain">
+    <input type="text" name="name" placeholder="Your Name" required>
+    <input type="email" name="email" placeholder="Your Email" required>
+    <textarea name="message" rows="5" placeholder="Your Feedback / Comment" required></textarea>
+    <button type="submit">Send Feedback</button>
+  </form>
+</section>
+
+<footer>
+  <p>© 2025 Hasnain Ali Qureshi All Rights Reserved</p>
+</footer>
+
+<script>
+(function(){
+  try{
+    var url = encodeURIComponent(window.location.href);
+    var text = encodeURIComponent("Check this amazing website!");
+    document.getElementById('share-whatsapp').href = "https://wa.me/?text="+text+"%20"+url;
+    document.getElementById('share-facebook').href = "https://www.facebook.com/sharer/sharer.php?u="+url;
+    document.getElementById('share-instagram').href = "https://www.instagram.com/?url="+url;
+  }catch(e){}
+})();
+</script>
+
+</body>
+</html>
