@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>English → Urdu Translator</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #3657FF; /* solid blue */
+      color: #1e1e1e;
+    }
+    nav {
+      background: #000;
+      padding: 15px;
+      text-align: center;
+    }
+    nav h1 {
+      margin: 0;
+      font-size: 22px;
+      color: white;
+    }
+    nav button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background: #06b6d4;
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    nav button:hover {
+      background: #028090;
+      color: #fff;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+    textarea {
+      width: 100%;
+      min-height: 200px;
+      margin: 10px 0;
+      padding: 12px;
+      font-size: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+      color: #000;
+      resize: vertical;
+    }
+    #outputText {
+      font-family: 'Noto Nastaliq Urdu', serif;
+      font-size: 18px;
+      direction: rtl;
+      text-align: right;
+      background: #fffdf5;
+      min-height: 250px;
+      overflow-y: auto;
+      box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
+    }
+    button {
+      padding: 10px 18px;
+      background: #06b6d4;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 8px;
+      transition: all 0.3s;
+    }
+    button:hover {
+      background: #028090;
+      color: #fff;
+    }
+    footer {
+      background: #000;
+      color: white;
+      text-align: center;
+      padding: 12px;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <h1>Translation Tool</h1>
+    <button onclick="window.location.href='index.html'">Back to Home</button>
+  </nav>
+
+  <!-- Translator -->
+  <div class="container">
+    <h2>English → Urdu Translator</h2>
+    <label>Input (English)</label>
+    <textarea id="inputText" placeholder="Enter English text (sentence, paragraph, or passage up to 750+ words)..."></textarea>
+    
+    <button onclick="translateText()">Translate → Urdu</button>
+    <button onclick="clearText()">Clear</button>
+    
+    <label>Output (Urdu)</label>
+    <textarea id="outputText" readonly placeholder="Urdu translation will appear here..."></textarea>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    © 2025 Hasnain Ali Qureshi All Rights Reserved
+  </footer>
+
+<script>
+async function translateChunk(chunk) {
+  const res = await fetch("https://api.mymemory.translated.net/get?q=" 
+                          + encodeURIComponent(chunk) + "&langpair=en|ur");
+  const data = await res.json();
+  return data.responseData.translatedText;
+}
+
+async function translateText() {
+  const text = document.getElementById("inputText").value.trim();
+  if (!text) {
+    alert("Please enter some English text!");
+    return;
+  }
+
+  // Break text into chunks (approx 200 words each to be safe)
+  const words = text.split(/\s+/);
+  const chunks = [];
+  let chunk = [];
+
+  words.forEach((word, i) => {
+    chunk.push(word);
+    if (chunk.length >= 200) {
+      chunks.push(chunk.join(" "));
+      chunk = [];
+    }
+  });
+  if (chunk.length) chunks.push(chunk.join(" "));
+
+  document.getElementById("outputText").value = "Translating, please wait...";
+
+  let finalTranslation = "";
+  for (let i = 0; i < chunks.length; i++) {
+    try {
+      const translated = await translateChunk(chunks[i]);
+      finalTranslation += translated + " ";
+    } catch (err) {
+      finalTranslation += "[Error translating chunk " + (i+1) + "]";
+    }
+  }
+
+  document.getElementById("outputText").value = finalTranslation.trim();
+}
+
+function clearText() {
+  document.getElementById("inputText").value = "";
+  document.getElementById("outputText").value = "";
+}
+</script>
+
+</body>
+</html>
